@@ -8,10 +8,15 @@ PREFIX ?= /usr/local
 INCLUDE_PATH ?= include/btls
 LIBRARY_PATH ?= lib
 PKGCONF_PATH ?= pkgconfig
+INSTALL_INCLUDE_PATH = $(PREFIX)/$(INCLUDE_PATH)
+INSTALL_LIBRARY_PATH = $(PREFIX)/$(LIBRARY_PATH)
+INSTALL_PKGCONF_PATH = $(INSTALL_LIBRARY_PATH)/$(PKGCONF_PATH)
 
 TLSPREFIX ?= /usr/local/opt/libressl
 
 UNAME := $(shell uname)
+
+INSTALL ?= cp -a
 
 all: $(TARGET) $(PKGCONFNAME)
 
@@ -29,7 +34,7 @@ ifeq ($(UNAME), Darwin)
 endif
 	rm *.o
 
-install:
+install: $(PKGCONFNAME)
 	mkdir -p $(TARGET)/usr/local/lib
 	mkdir -p $(TARGET)/usr/local/include/$(TARGET)
 	cp *.h $(TARGET)/usr/local/include/$(TARGET)
@@ -43,6 +48,7 @@ ifeq ($(UNAME), Linux)
 endif
 	mkdir -p $(PREFIX)
 	cp -r $(TARGET)/usr/local/* $(PREFIX)/
+	$(INSTALL) $(PKGCONFNAME) $(INSTALL_PKGCONF_PATH)
 
 package:
 ifeq ($(UNAME), Linux)
