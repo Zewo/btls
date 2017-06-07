@@ -48,6 +48,7 @@ ifeq ($(UNAME), Linux)
 endif
 	mkdir -p $(PREFIX)
 	cp -r $(TARGET)/usr/local/* $(PREFIX)/
+	mkdir -p $(INSTALL_PKGCONF_PATH)
 	$(INSTALL) $(PKGCONFNAME) $(INSTALL_PKGCONF_PATH)
 
 package:
