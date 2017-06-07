@@ -34,7 +34,7 @@ ifeq ($(UNAME), Darwin)
 endif
 	rm *.o
 
-install: $(PKGCONFNAME)
+install: $(TARGET) $(PKGCONFNAME)
 	mkdir -p $(TARGET)/usr/local/lib
 	mkdir -p $(TARGET)/usr/local/include/$(TARGET)
 	cp *.h $(TARGET)/usr/local/include/$(TARGET)
