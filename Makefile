@@ -2,15 +2,18 @@ TARGET = btls
 LIB_NAME = btls
 PKG_NAME = btls
 PKG_VERSION = 0.1.0
+PKGCONFNAME = btls.pc
 
 PREFIX ?= /usr/local
+INCLUDE_PATH ?= include/btls
+LIBRARY_PATH ?= lib
+PKGCONF_PATH ?= pkgconfig
+
 TLSPREFIX ?= /usr/local/opt/libressl
 
 UNAME := $(shell uname)
 
-.PHONY: install package
-
-all: $(TARGET)
+all: $(TARGET) $(PKGCONFNAME)
 
 $(TARGET): *.c
 	clang -c *.c -I$(TLSPREFIX)/include -mmacosx-version-min=10.10
@@ -61,3 +64,18 @@ ifeq ($(UNAME), Linux)
 	dpkg-deb --build $(TARGET)
 	rm -rf $(TARGET)
 endif
+
+$(PKGCONFNAME): btls.h
+	@echo "Generating $@ for pkgconfig..."
+	@echo prefix=$(PREFIX) > $@
+	@echo exec_prefix=\$${prefix} >> $@
+	@echo libdir=$(PREFIX)/$(LIBRARY_PATH) >> $@
+	@echo includedir=$(PREFIX)/$(INCLUDE_PATH) >> $@
+	@echo >> $@
+	@echo Name: $(TARGET) >> $@
+	@echo Description: TLS socket library for libdill. >> $@
+	@echo Version: $(PKG_VERSION) >> $@
+	@echo Libs: -L\$${libdir} -lbtls -ldill >> $@
+	@echo Cflags: -I\$${includedir} >> $@
+
+.PHONY: all install package

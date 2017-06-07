@@ -1,2 +1,6 @@
 btls/
-libbtls.dylib
+/*.o
+/*.so
+/*.dylib
+/*.a
+/*.pc
