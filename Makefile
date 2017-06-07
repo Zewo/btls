@@ -81,6 +81,7 @@ $(PKGCONFNAME): btls.h
 	@echo >> $@
 	@echo Name: $(TARGET) >> $@
 	@echo Description: TLS socket library for libdill. >> $@
+	@echo Requires: libtls libssl libcrypto >> $@
 	@echo Version: $(PKG_VERSION) >> $@
 	@echo Libs: -L\$${libdir} -lbtls -ldill >> $@
 	@echo Cflags: -I\$${includedir} >> $@
