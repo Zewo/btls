@@ -27,7 +27,7 @@
 
 #include <sys/uio.h>
 
-#include "dsock.h"
+#include "btls.h"
 
 /* Checks whether iolist is valid. Returns 0 in case of success or -1 in case
    of error. Fills in number of buffers in the list and overall number of bytes

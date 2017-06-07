@@ -22,7 +22,7 @@
 
 */
 
-#include "libdill.h"
+#include <libdill.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
