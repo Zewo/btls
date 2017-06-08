@@ -32,22 +32,13 @@
 #include <sys/types.h>
 
 /******************************************************************************/
-/*  ABI versioning support.                                                   */
+/*  Semantic Versioning - http://semver.org                                   */
 /******************************************************************************/
 
-/*  Don't change this unless you know exactly what you're doing and have      */
-/*  read and understand the following documents:                              */
-/*  www.gnu.org/software/libtool/manual/html_node/Libtool-versioning.html     */
-/*  www.gnu.org/software/libtool/manual/html_node/Updating-version-info.html  */
-
-/*  The current interface version. */
-#define BTLS_VERSION_CURRENT 1
-
-/*  The latest revision of the current interface. */
-#define BTLS_VERSION_REVISION 0
-
-/*  How many past interface versions are still supported. */
-#define BTLS_VERSION_AGE 0
+#define BTLS_MAJOR 0
+#define BTLS_MINOR 1
+#define BTLS_PATCH 0
+#define BTLS_SONAME 0.1
 
 /******************************************************************************/
 /*  Symbol visibility.                                                        */
@@ -168,13 +159,13 @@
 #define BTLS_CIPHERS_AES256_SHA                        (1ull << 39)
 
 #define BTLS_DEFAULT \
-(BTLS_PROTO_DEFAULT| \
-BTLS_DHEPARAMS_NONE| \
-BTLS_ECDHECURVE_AUTO| \
-BTLS_CIPHERS_DEFAULT| \
-BTLS_VERIFY_DEPTH_DEFAULT| \
-BTLS_PREFER_CIPHERS_SERVER| \
-BTLS_CLEAR_KEYS)
+    (BTLS_PROTO_DEFAULT| \
+    BTLS_DHEPARAMS_NONE| \
+    BTLS_ECDHECURVE_AUTO| \
+    BTLS_CIPHERS_DEFAULT| \
+    BTLS_VERIFY_DEPTH_DEFAULT| \
+    BTLS_PREFER_CIPHERS_SERVER| \
+    BTLS_CLEAR_KEYS)
 
 struct btls_kp {
     const uint8_t *certmem;
@@ -190,80 +181,123 @@ struct btls_ca {
 };
 
 BTLS_EXPORT uint8_t *btls_loadfile(
-                                   const char *file,
-                                   size_t *len,
-                                   char *password);
+    const char *file,
+    size_t *len,
+    char *password
+);
+
 BTLS_EXPORT int btls_ca(
-                        struct btls_ca *c,
-                        const char *file,
-                        const char *path,
-                        const uint8_t *mem,
-                        size_t len);
+    struct btls_ca *c,
+    const char *file,
+    const char *path,
+    const uint8_t *mem,
+    size_t len
+);
+
 BTLS_EXPORT int btls_kp(
-                        struct btls_kp *kp,
-                        const uint8_t *cert,
-                        size_t certlen,
-                        const uint8_t *key,
-                        size_t keylen);
+    struct btls_kp *kp,
+    const uint8_t *cert,
+    size_t certlen,
+    const uint8_t *key,
+    size_t keylen
+);
+
 BTLS_EXPORT const char *btls_error(
-                                   int s);
+    int s
+);
+
 BTLS_EXPORT int btls_attach_server(
-                                   int s,
-                                   uint64_t flags,
-                                   uint64_t ciphers,
-                                   struct btls_kp *kp,
-                                   size_t kplen,
-                                   struct btls_ca *ca,
-                                   const char *alpn);
+    int s,
+    uint64_t flags,
+    uint64_t ciphers,
+    struct btls_kp *kp,
+    size_t kplen,
+    struct btls_ca *ca,
+    const char *alpn
+);
+
 BTLS_EXPORT int btls_attach_accept(
-                                   int s,
-                                   int l);
+    int s,
+    int l
+);
+
 BTLS_EXPORT int btls_attach_client(
-                                   int s,
-                                   uint64_t flags,
-                                   uint64_t ciphers,
-                                   struct btls_ca *ca,
-                                   const char *alpn,
-                                   const char *servername);
+    int s,
+    uint64_t flags,
+    uint64_t ciphers,
+    struct btls_ca *ca,
+    const char *alpn,
+    const char *servername
+);
+
 BTLS_EXPORT int btls_attach_client_kp(
-                                      int s,
-                                      uint64_t flags,
-                                      uint64_t ciphers,
-                                      struct btls_kp *kp,
-                                      size_t kplen,
-                                      struct btls_ca *ca,
-                                      const char *alpn,
-                                      const char *servername);
+    int s,
+    uint64_t flags,
+    uint64_t ciphers,
+    struct btls_kp *kp,
+    size_t kplen,
+    struct btls_ca *ca,
+    const char *alpn,
+    const char *servername
+);
+
 BTLS_EXPORT int btls_detach(
-                            int s,
-                            int64_t deadline);
+    int s,
+    int64_t deadline
+);
+
 BTLS_EXPORT void btls_reset(
-                            int s);
+    int s
+);
+
 BTLS_EXPORT int btls_handshake(
-                               int s,
-                               int64_t deadline);
+    int s,
+    int64_t deadline
+);
+
 BTLS_EXPORT int btls_peercertprovided(
-                                      int s);
+    int s
+);
+
 BTLS_EXPORT int btls_peercertcontainsname(
-                                          int s,
-                                          const char *name);
+    int s,
+    const char *name
+);
+
 BTLS_EXPORT const char *btls_peercerthash(
-                                          int s);
+    int s
+);
+
 BTLS_EXPORT const char *btls_peercertissuer(
-                                            int s);
+    int s
+);
+
 BTLS_EXPORT const char *btls_peercertsubject(
-                                             int s);
+    int s
+);
+
 BTLS_EXPORT time_t btls_peercertnotbefore(
-                                          int s);
+    int s
+);
+
 BTLS_EXPORT time_t btls_peercertnotafter(
-                                         int s);
+    int s
+);
+
 BTLS_EXPORT const char *btls_connalpnselected(
-                                              int s);
+    int s
+);
+
 BTLS_EXPORT const char *btls_conncipher(
-                                        int s);
+    int s
+);
+
 BTLS_EXPORT const char *btls_connservername(
-                                            int s);
+    int s
+);
+
 BTLS_EXPORT const char *btls_connversion(
-                                         int s);
+    int s
+);
 
 #endif
