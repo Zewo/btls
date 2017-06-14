@@ -1,4 +1,5 @@
-OBJ = btls.o iol.o utils.o
+SRC=src/btls.c src/iol.c src/utils.c
+OBJ = $(SRC:%.c=%.o)
 LIBNAME = libbtls
 PKGCONFNAME = btls.pc
 
@@ -25,8 +26,8 @@ CC := $(shell sh -c 'type $(CC) >/dev/null 2>/dev/null && echo $(CC) || echo gcc
 OPTIMIZATION ?= -O3
 WARNINGS = -Wall -W -Wstrict-prototypes -Wwrite-strings
 DEBUG_FLAGS ?= -g -ggdb
-REAL_CFLAGS = $(OPTIMIZATION) -fPIC $(CFLAGS) $(WARNINGS) $(DEBUG_FLAGS) $(ARCH) -I$(LIBRESSL_INCLUDE_PATH)
-REAL_LDFLAGS = $(LDFLAGS) $(ARCH) -L$(LIBRESSL_LIBRARY_PATH) -lcrypto -lssl -ltls -ldill
+REAL_CFLAGS = $(OPTIMIZATION) -I./include -I/usr/local/include -fPIC $(CFLAGS) $(WARNINGS) $(DEBUG_FLAGS) $(ARCH) -I$(LIBRESSL_INCLUDE_PATH)
+REAL_LDFLAGS = $(LDFLAGS) $(ARCH) -L$(LIBRESSL_LIBRARY_PATH) -L/usr/local/lib -lcrypto -lssl -ltls -ldill
 
 DYLIBSUFFIX = so
 STLIBSUFFIX = a
@@ -49,9 +50,9 @@ endif
 all: $(DYLIBNAME) $(STLIBNAME) $(PKGCONFNAME)
 
 # Deps (use make dep to generate this)
-btls.o: btls.c btls.h iol.h utils.h
-iol.o: iol.c iol.h utils.h
-utils.o: utils.c utils.h
+btls.o: src/btls.c include/btls.h include/iol.h include/utils.h
+iol.o: src/iol.c include/iol.h include/utils.h
+utils.o: src/utils.c include/utils.h
 
 $(DYLIBNAME): $(OBJ)
 	$(DYLIB_MAKE_CMD) $(OBJ)
@@ -65,18 +66,18 @@ static: $(STLIBNAME)
 btls-%: %.o $(STLIBNAME)
 	$(CC) $(REAL_CFLAGS) -o $@ $(REAL_LDFLAGS) $< $(STLIBNAME)
 
-.c.o:
-	$(CC) -std=gnu99 -pedantic -c $(REAL_CFLAGS) $<
+%.o: %.c
+	$(CC) -c $(REAL_CFLAGS) -std=gnu99 -pedantic $< -o $@
 
 clean:
-	rm -rf $(DYLIBNAME) $(STLIBNAME) $(PKGCONFNAME) *.o
+	rm -rf $(DYLIBNAME) $(STLIBNAME) $(PKGCONFNAME) $(OBJ)
 
 dep:
-	$(CC) -MM *.c
+	$(CC) -MM $(SRC)
 
 INSTALL ?= cp -a
 
-$(PKGCONFNAME): btls.h
+$(PKGCONFNAME): include/btls.h
 	@echo "Generating $@ for pkgconfig..."
 	@echo prefix=$(PREFIX) > $@
 	@echo exec_prefix=\$${prefix} >> $@
