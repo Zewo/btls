@@ -40,7 +40,7 @@ extern const void *tcp_type;
 extern const void *tcp_listener_type;
 int tcp_fd(int s);
 
-static int btls_init();
+static int btls_init(void);
 static struct tls_config *btls_configure(uint64_t flags, uint64_t ciphers,
       struct btls_kp *kp, size_t kplen, struct btls_ca *ca, const char *alpn);
 static int btls_conn_create(int s, struct tls *tls, struct tls_config *c,
@@ -412,7 +412,7 @@ int btls_attach_accept(int s, int l) {
 /*  TLS common functions                                                      */
 /******************************************************************************/
 
-static int btls_init() {
+static int btls_init(void) {
     static int init = 0;
     if(dsock_fast(init))
         return 0;
