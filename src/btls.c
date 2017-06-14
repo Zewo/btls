@@ -45,8 +45,7 @@ static struct tls_config *btls_configure(uint64_t flags, uint64_t ciphers,
       struct btls_kp *kp, size_t kplen, struct btls_ca *ca, const char *alpn);
 static int btls_conn_create(int s, struct tls *tls, struct tls_config *c,
       const char *servername);
-static int btls_listener_create(int s, struct tls *tls, struct tls_config *c,
-      const char *servername);
+static int btls_listener_create(int s, struct tls *tls, struct tls_config *c);
 static int btls_wait_close(struct tls *tls, int fd, int64_t deadline);
 
 struct btls_rxbuf {
@@ -59,7 +58,7 @@ struct btls_rxbuf {
 /*  TLS connection socket                                                     */
 /******************************************************************************/
 
-dsock_unique_id(btls_conn_type);
+dsock_unique_id(btls_conn_type)
 
 static void *btls_conn_hquery(struct hvfs *hvfs, const void *type);
 static void btls_conn_hclose(struct hvfs *hvfs);
@@ -131,7 +130,7 @@ static ssize_t btls_conn_get(struct btls_conn *obj, void *buf, size_t len,
     size_t pos = 0;
     if(btls_conn_handshake(obj, deadline)) return -1;
     while(1) {
-        ssize_t rc = tls_read(obj->tls, buf + pos, len);
+      ssize_t rc = tls_read(obj->tls, (char *)buf + pos, len);
         if(rc == TLS_WANT_POLLIN)
             rc = fdin(obj->fd, deadline);
         else if(rc == TLS_WANT_POLLOUT)
@@ -141,7 +140,7 @@ static ssize_t btls_conn_get(struct btls_conn *obj, void *buf, size_t len,
         else if(dsock_slow(rc == 0)) {
             errno = ECONNRESET; 
             return -1;
-        } else if(dsock_fast(rc == len))
+        } else if(dsock_fast((size_t)rc == len))
             return pos + rc;
         else if(dsock_fast(rc > 0)) {
             if(!block) return rc;
@@ -191,7 +190,7 @@ static ssize_t btls_conn_brecv(struct btls_conn *obj, void *buf, size_t len,
         /* Use data from rxbuf. */
         size_t remaining = rxbuf->len - rxbuf->pos;
         size_t tocopy = remaining < len ? remaining : len;
-        memcpy(buf + pos, (char*)(rxbuf->data) + rxbuf->pos, tocopy);
+        memcpy((char *)buf + pos, (char*)(rxbuf->data) + rxbuf->pos, tocopy);
         rxbuf->pos += tocopy;
         pos += tocopy;
         len -= tocopy;
@@ -200,7 +199,7 @@ static ssize_t btls_conn_brecv(struct btls_conn *obj, void *buf, size_t len,
         /* If requested amount of data is large avoid the copy
            and read it directly into user's buffer. */
         if(len >= sizeof(rxbuf->data)) {
-            ssize_t sz = btls_conn_get(obj, buf + pos, len, 0, deadline);
+          ssize_t sz = btls_conn_get(obj, (char *)buf + pos, len, 0, deadline);
             if(dsock_slow(sz < 0)) return -1;
             read += sz;
             return read;
@@ -305,7 +304,7 @@ error:
 /*  TLS listener socket                                                       */
 /******************************************************************************/
 
-dsock_unique_id(btls_listener_type);
+dsock_unique_id(btls_listener_type)
 
 static void *btls_listener_hquery(struct hvfs *hvfs, const void *type);
 static void btls_listener_hclose(struct hvfs *hvfs);
@@ -334,8 +333,7 @@ static void btls_listener_hclose(struct hvfs *hvfs) {
     free(obj);
 }
 
-static int btls_listener_create(int s, struct tls *tls, struct tls_config *c,
-      const char *servername) {
+static int btls_listener_create(int s, struct tls *tls, struct tls_config *c) {
     /* Check whether underlying socket is a TCP listener socket. */
     if(dsock_slow(!hquery(s, tcp_listener_type))) return -1;
     /* Create the object. */
@@ -378,7 +376,7 @@ int btls_attach_server(int s, uint64_t flags, uint64_t ciphers,
     if(flags & BTLS_CLEAR_KEYS)
         tls_config_clear_keys(c);
     /* Create the btls object. */
-    int h = btls_listener_create(s, t, c, NULL);
+    int h = btls_listener_create(s, t, c);
     if(h == -1) goto error;
     return h;
 error:
@@ -490,7 +488,7 @@ int btls_detach(int s, int64_t deadline) {
 void btls_reset(int s) {
     struct btls_conn *c = hquery(s, btls_conn_type);
     if(dsock_slow(!c)) {errno = ENOTSUP; return;}
-    return tls_reset(c->tls);
+    tls_reset(c->tls);
 }
 
 int btls_handshake(int s, int64_t deadline) {
@@ -707,7 +705,7 @@ static struct tls_config *btls_configure(uint64_t flags, uint64_t ciphers,
             if(ciphers & BTLS_CIPHERS_AES256_SHA)
                 p = strappend(p, cl, "AES256-SHA:");
             if(p != cl) {
-                dsock_assert(p - cl <= sizeof(cl));
+              dsock_assert((unsigned long)(p - cl) <= sizeof(cl));
                 *(p - 1) = '\0'; /* remove last ':' */
             }
             tls_config_set_ciphers(c, cl);

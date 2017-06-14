@@ -3,10 +3,10 @@ OBJ = $(SRC:%.c=%.o)
 LIBNAME = libbtls
 PKGCONFNAME = btls.pc
 
-MAJOR_VERSION = $(shell grep BTLS_MAJOR btls.h  | awk '{print $$3}')
-MINOR_VERSION = $(shell grep BTLS_MINOR btls.h  | awk '{print $$3}')
-PATCH_VERSION = $(shell grep BTLS_PATCH btls.h  | awk '{print $$3}')
-SONAME        = $(shell grep BTLS_SONAME btls.h | awk '{print $$3}')
+MAJOR_VERSION = $(shell grep BTLS_MAJOR include/btls.h  | awk '{print $$3}')
+MINOR_VERSION = $(shell grep BTLS_MINOR include/btls.h  | awk '{print $$3}')
+PATCH_VERSION = $(shell grep BTLS_PATCH include/btls.h  | awk '{print $$3}')
+SONAME        = $(shell grep BTLS_SONAME include/btls.h | awk '{print $$3}')
 
 # Installation related variables and target
 PREFIX ?= /usr/local
