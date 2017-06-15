@@ -31,7 +31,7 @@ int iol_check(struct iolist *first, struct iolist *last,
       size_t *nbufs, size_t *nbytes) {
     if(dsock_slow(!first || !last || last->iol_next)) {
         errno = EINVAL; return -1;}
-    size_t nbf = 0, nbt = 0, res = 0;
+    size_t nbf = 0, nbt = 0;
     struct iolist *it;
     for(it = first; it; it = it->iol_next) {
         if(dsock_slow(it->iol_rsvd || (!it->iol_next && it != last)))
@@ -68,8 +68,7 @@ void iol_copy(struct iolist *first, uint8_t *dst) {
     }
 }
 
-void iol_slice_init(struct iol_slice *self, struct iolist *first,
-      struct iolist *last, size_t offset, size_t len) {
+void iol_slice_init(struct iol_slice *self, struct iolist *first, size_t offset, size_t len) {
     struct iolist *it = first;
     while(offset >= it->iol_len) {
         offset -= it->iol_len;
@@ -77,7 +76,7 @@ void iol_slice_init(struct iol_slice *self, struct iolist *first,
         dsock_assert(it);
     }
     self->first = *it;
-    self->first.iol_base += offset;
+    self->first.iol_base = (char *)self->first.iol_base + offset;
     self->first.iol_len -= offset;
     self->first.iol_rsvd = 0;
     it = &self->first;
